@@ -65,17 +65,17 @@ Home Page
 @login_required
 @render_to("mhcdashboardapp/home.html")
 def home(request):
-    workplanareas = WorkplanArea.objects.filter(year=datetime.datetime.now().year)
-    mhcactivities = MHCActivity.objects.filter(year=datetime.datetime.now().year)
-    orgactivities = OrganizationActivity.objects.filter(year=datetime.datetime.now().year)
+    workplanareas = WorkplanArea.objects.filter(year=CURRENT_YEAR)
+    mhcactivities = MHCActivity.objects.filter(year=CURRENT_YEAR)
+    orgactivities = OrganizationActivity.objects.filter(year=CURRENT_YEAR)
     organizations = []
     orgs = Organization.objects.all()
     for org in orgs:
         if org._get_activity_quarters() != "No active quarters reporting on":
             organizations.append(org)
     indicators = Indicator.objects.all()
-    outputs = Output.objects.filter(orgnization_activity__year=datetime.datetime.now().year)
-    outputs_goal_no = Output.objects.filter(is_goal=0,orgnization_activity__year=datetime.datetime.now().year)
+    outputs = Output.objects.filter(orgnization_activity__year=CURRENT_YEAR)
+    outputs_goal_no = Output.objects.filter(is_goal=0,orgnization_activity__year=CURRENT_YEAR)
     org_qt_summary_all = []
     org_qt_summary_goal = []
     org_pf_summary = []
@@ -93,7 +93,7 @@ def home(request):
         tmp_org_pf_summary_q2 = collections.OrderedDict([("Org",org.abbreviation),("perform",collections.OrderedDict([("Yes",0),("No",0),("NotReported",0),("TBD",0)]))])
         tmp_org_pf_summary_q3 = collections.OrderedDict([("Org",org.abbreviation),("perform",collections.OrderedDict([("Yes",0),("No",0),("NotReported",0),("TBD",0)]))])
         tmp_org_pf_summary_q4 = collections.OrderedDict([("Org",org.abbreviation),("perform",collections.OrderedDict([("Yes",0),("No",0),("NotReported",0),("TBD",0)]))])
-        org_outputs = Output.objects.filter(orgnization_activity__organization=tmp_org,orgnization_activity__year=datetime.datetime.now().year)
+        org_outputs = Output.objects.filter(orgnization_activity__organization=tmp_org,orgnization_activity__year=CURRENT_YEAR)
         for org_output in org_outputs:
             if org_output.active_quarter is not None:
                 tmp_org_qt_summary_all["quarter"]["Q%d" % org_output.active_quarter.quarter] += 1
@@ -128,7 +128,7 @@ def home(request):
     workplanarea_num_orgact = {}
     for wpa in workplanareas:
         workplanarea_goals[wpa.str_id] = 0
-        workplanarea_num_orgact[wpa.str_id] = len(OrganizationActivity.objects.filter(workplan_area=wpa.id,year=datetime.datetime.now().year))
+        workplanarea_num_orgact[wpa.str_id] = len(OrganizationActivity.objects.filter(workplan_area=wpa.id,year=CURRENT_YEAR))
     orgact_summary = []
     for orgact in orgactivities:
         outputs_num = len(Output.objects.filter(orgnization_activity=orgact.id))
@@ -196,7 +196,8 @@ def report_output(request):
     mhc_activitie_ids = []
     org_activities = []
     org_activitie_ids = []
-    outputs_current = Output.objects.filter(orgnization_activity__year=datetime.datetime.now().year).filter(active_quarter__quarter=report_q).filter(orgnization_activity__organization__id=org_id).order_by('id')
+#    outputs_current = Output.objects.filter(orgnization_activity__year=datetime.datetime.now().year).filter(active_quarter__quarter=report_q).filter(orgnization_activity__organization__id=org_id).order_by('id')
+    outputs_current = Output.objects.filter(orgnization_activity__year=CURRENT_YEAR).filter(active_quarter__quarter=report_q).filter(orgnization_activity__organization__id=org_id).order_by('id')
 
     for op in outputs_current:
         if not (op.orgnization_activity.workplan_area in workplan_areas):
@@ -208,11 +209,13 @@ def report_output(request):
             org_activities.append(op.orgnization_activity)
             org_activitie_ids.append(op.orgnization_activity.id)       
     if report_q > 1:
-        outputs_previous = Output.objects.filter(orgnization_activity__year=datetime.datetime.now().year).filter(active_quarter__quarter__lt=report_q).filter(orgnization_activity__organization__id=org_id)
+#        outputs_previous = Output.objects.filter(orgnization_activity__year=datetime.datetime.now().year).filter(active_quarter__quarter__lt=report_q).filter(orgnization_activity__organization__id=org_id)
+        outputs_previous = Output.objects.filter(orgnization_activity__year=CURRENT_YEAR).filter(active_quarter__quarter__lt=report_q).filter(orgnization_activity__organization__id=org_id)
     else:
         outputs_previous = None
     
-    outputs_report = Output.objects.filter(orgnization_activity__year=datetime.datetime.now().year).filter(active_quarter__quarter=report_q).filter(orgnization_activity__organization__id=org_id).order_by('id')
+#    outputs_report = Output.objects.filter(orgnization_activity__year=datetime.datetime.now().year).filter(active_quarter__quarter=report_q).filter(orgnization_activity__organization__id=org_id).order_by('id')
+    outputs_report = Output.objects.filter(orgnization_activity__year=CURRENT_YEAR).filter(active_quarter__quarter=report_q).filter(orgnization_activity__organization__id=org_id).order_by('id')
     if request.method == 'POST':
         # pre-select Workplan Area, MHC Activity, Org Activity as filters
         if request.POST["OrgActID"]:
@@ -279,12 +282,14 @@ def report_output(request):
                 error_info = exc_obj
                 error_msg = "%s: %s. Please try again!" % (error_type,error_info)
         if error_msg == "":
-            outputs_current = Output.objects.filter(orgnization_activity__year=datetime.datetime.now().year).filter(active_quarter__quarter=report_q).filter(orgnization_activity__organization__id=org_id).order_by('id')
+#            outputs_current = Output.objects.filter(orgnization_activity__year=datetime.datetime.now().year).filter(active_quarter__quarter=report_q).filter(orgnization_activity__organization__id=org_id).order_by('id')
+            outputs_current = Output.objects.filter(orgnization_activity__year=CURRENT_YEAR).filter(active_quarter__quarter=report_q).filter(orgnization_activity__organization__id=org_id).order_by('id')
             save_msg = "Changes to Output have been saved!"
     
     return {
         "report_quarter":report_q,
-        "report_year":datetime.datetime.now().year,
+#        "report_year":datetime.datetime.now().year,
+        "report_year":CURRENT_YEAR,
         "organization":organization,
         "select_options":select_options,
         "workplan_areas":workplan_areas,
@@ -321,7 +326,7 @@ def report_output_temp(request,qid):
     mhc_activitie_ids = []
     org_activities = []
     org_activitie_ids = []
-    outputs_current = Output.objects.filter(orgnization_activity__year=datetime.datetime.now().year).filter(active_quarter__quarter=report_q).filter(orgnization_activity__organization__id=org_id).order_by('id')
+    outputs_current = Output.objects.filter(orgnization_activity__year=CURRENT_YEAR).filter(active_quarter__quarter=report_q).filter(orgnization_activity__organization__id=org_id).order_by('id')
 
     for op in outputs_current:
         if not (op.orgnization_activity.workplan_area in workplan_areas):
@@ -333,11 +338,11 @@ def report_output_temp(request,qid):
             org_activities.append(op.orgnization_activity)
             org_activitie_ids.append(op.orgnization_activity.id)       
     if report_q > 1:
-        outputs_previous = Output.objects.filter(orgnization_activity__year=datetime.datetime.now().year).filter(active_quarter__quarter__lt=report_q).filter(orgnization_activity__organization__id=org_id)
+        outputs_previous = Output.objects.filter(orgnization_activity__year=CURRENT_YEAR).filter(active_quarter__quarter__lt=report_q).filter(orgnization_activity__organization__id=org_id)
     else:
         outputs_previous = None
 
-    outputs_report = Output.objects.filter(orgnization_activity__year=datetime.datetime.now().year).filter(active_quarter__quarter=report_q).filter(orgnization_activity__organization__id=org_id).order_by('id')
+    outputs_report = Output.objects.filter(orgnization_activity__year=CURRENT_YEAR).filter(active_quarter__quarter=report_q).filter(orgnization_activity__organization__id=org_id).order_by('id')
     if request.method == 'POST':
         # pre-select Workplan Area, MHC Activity, Org Activity as filters
         if request.POST["OrgActID"]:
@@ -404,12 +409,12 @@ def report_output_temp(request,qid):
                 error_info = exc_obj
                 error_msg = "%s: %s. Please try again!" % (error_type,error_info)
         if error_msg == "":
-            outputs_current = Output.objects.filter(orgnization_activity__year=datetime.datetime.now().year).filter(active_quarter__quarter=report_q).filter(orgnization_activity__organization__id=org_id).order_by('id')
+            outputs_current = Output.objects.filter(orgnization_activity__year=CURRENT_YEAR).filter(active_quarter__quarter=report_q).filter(orgnization_activity__organization__id=org_id).order_by('id')
             save_msg = "Changes to Output have been saved!"
 
     return {
         "report_quarter":report_q,
-        "report_year":datetime.datetime.now().year,
+        "report_year":CURRENT_YEAR,
         "organization":organization,
         "select_options":select_options,
         "workplan_areas":workplan_areas,
@@ -465,7 +470,7 @@ def output_reportpage_1(request):
         "closed_reporting_quarters":closed_reporting_quarters,
         "workplan_directions":workplan_directions_json,
         "barpiechart_data":outputs_summary_json,
-        "report_year":datetime.datetime.now().year,
+        "report_year":CURRENT_YEAR,
     }
 
 # Report Template 2 - Bullet Bar
@@ -505,7 +510,7 @@ def output_reportpage_2(request):
         "closed_reporting_quarters":closed_reporting_quarters,
         "workplan_directions":workplan_directions_json,
         "barpiechart_data":outputs_summary_json,
-        "report_year":datetime.datetime.now().year,
+        "report_year":CURRENT_YEAR,
     }
     
 # Report Builder with Template 1
@@ -518,14 +523,14 @@ def output_reportpage_builder(request):
         previous_report_quarter =  1
     else:
         closed_reporting_quarters += "".join((", Q%d" % q for q in range(2,previous_report_quarter+1)))
-    outputs = Output.objects.filter(orgnization_activity__year=datetime.datetime.now().year)
+    outputs = Output.objects.filter(orgnization_activity__year=CURRENT_YEAR)
     outputs_summary = []
     workplan_directions = WorkplanDirection.objects.all()
     wpds = []
     goal_choices = {1:"Yes",0:"No",-1:"NotReported",-99:"TBD"}
     for wpd in workplan_directions:
         wpds.append({"str_id":wpd.str_id,"description":wpd.description})
-        workplan_areas = WorkplanArea.objects.filter(workplan_direction=wpd,year=datetime.datetime.now().year)
+        workplan_areas = WorkplanArea.objects.filter(workplan_direction=wpd,year=CURRENT_YEAR)
         outputs_pf_summary = []
         for wpa in workplan_areas:
             tmp_outputs_pf_summary = collections.OrderedDict([
@@ -533,7 +538,7 @@ def output_reportpage_builder(request):
             ("WPA_name",wpa.description),
             ("perform",collections.OrderedDict([("Yes",0),("No",0),("NotReported",0),("TBD",0)]))
             ])
-            wpa_outputs = Output.objects.filter(orgnization_activity__year=datetime.datetime.now().year).filter(orgnization_activity__workplan_area=wpa).filter(active_quarter__quarter__lte=previous_report_quarter)
+            wpa_outputs = Output.objects.filter(orgnization_activity__year=CURRENT_YEAR).filter(orgnization_activity__workplan_area=wpa).filter(active_quarter__quarter__lte=previous_report_quarter)
             for wpa_output in wpa_outputs:
                 if wpa_output.is_goal is not None:
                     tmp_outputs_pf_summary["perform"][goal_choices[wpa_output.is_goal]] += 1
@@ -545,7 +550,7 @@ def output_reportpage_builder(request):
         "closed_reporting_quarters":closed_reporting_quarters,
         "workplan_directions":workplan_directions_json,
         "barpiechart_data":outputs_summary_json,
-        "report_year":datetime.datetime.now().year,        
+        "report_year":CURRENT_YEAR,        
     }
 
 # Report Builder with Template 2
@@ -585,7 +590,7 @@ def output_reportpage_2_builder(request):
         "closed_reporting_quarters":closed_reporting_quarters,
         "workplan_directions":workplan_directions_json,
         "barpiechart_data":outputs_summary_json,
-        "report_year":datetime.datetime.now().year,        
+        "report_year":CURRENT_YEAR,        
     }
     
 @login_required
@@ -607,14 +612,14 @@ def output_customreport(request):
         previous_report_quarter =  1
     else:
         closed_reporting_quarters += "".join((", Q%d" % q for q in range(2,previous_report_quarter+1)))
-    outputs = Output.objects.filter(orgnization_activity__year=datetime.datetime.now().year)
+    outputs = Output.objects.filter(orgnization_activity__year=CURRENT_YEAR)
     outputs_summary = []
     workplan_directions = WorkplanDirection.objects.all()
     wpds = []
     goal_choices = {1:"Yes",0:"No",-1:"NotReported",-99:"TBD"}
     for wpd in workplan_directions:
         wpds.append({"str_id":wpd.str_id,"description":wpd.description})
-        workplan_areas = WorkplanArea.objects.filter(workplan_direction=wpd,year=datetime.datetime.now().year)
+        workplan_areas = WorkplanArea.objects.filter(workplan_direction=wpd,year=CURRENT_YEAR)
         outputs_pf_summary = []
         for wpa in workplan_areas:
             tmp_outputs_pf_summary = collections.OrderedDict([
@@ -622,7 +627,7 @@ def output_customreport(request):
             ("WPA_name",wpa.description),
             ("perform",collections.OrderedDict([("Yes",0),("No",0),("NotReported",0),("TBD",0)]))
             ])
-            wpa_outputs = Output.objects.filter(orgnization_activity__year=datetime.datetime.now().year).filter(orgnization_activity__workplan_area=wpa).filter(active_quarter__quarter__lte=previous_report_quarter)
+            wpa_outputs = Output.objects.filter(orgnization_activity__year=CURRENT_YEAR).filter(orgnization_activity__workplan_area=wpa).filter(active_quarter__quarter__lte=previous_report_quarter)
             for wpa_output in wpa_outputs:
                 if wpa_output.is_goal is not None:
                     tmp_outputs_pf_summary["perform"][goal_choices[wpa_output.is_goal]] += 1
@@ -655,14 +660,14 @@ def output_customreport_2(request):
         previous_report_quarter =  1
     else:
         closed_reporting_quarters += "".join((", Q%d" % q for q in range(2,previous_report_quarter+1)))
-    outputs = Output.objects.filter(orgnization_activity__year=datetime.datetime.now().year)
+    outputs = Output.objects.filter(orgnization_activity__year=CURRENT_YEAR)
     outputs_summary = []
     workplan_directions = WorkplanDirection.objects.all()
     wpds = []
     goal_choices = {1:"Yes",0:"No",-1:"NotReported",-99:"TBD"}
     for wpd in workplan_directions:
         wpds.append({"str_id":wpd.str_id,"description":wpd.description})
-        workplan_areas = WorkplanArea.objects.filter(workplan_direction=wpd,year=datetime.datetime.now().year)
+        workplan_areas = WorkplanArea.objects.filter(workplan_direction=wpd,year=CURRENT_YEAR)
         outputs_pf_summary = []
         for wpa in workplan_areas:
             tmp_outputs_pf_summary = collections.OrderedDict([
@@ -670,7 +675,7 @@ def output_customreport_2(request):
             ("WPA_name",wpa.description),
             ("perform",collections.OrderedDict([("Yes",0),("No",0),("NotReported",0),("TBD",0)]))
             ])
-            wpa_outputs = Output.objects.filter(orgnization_activity__year=datetime.datetime.now().year).filter(orgnization_activity__workplan_area=wpa).filter(active_quarter__quarter__lte=previous_report_quarter)
+            wpa_outputs = Output.objects.filter(orgnization_activity__year=CURRENT_YEAR).filter(orgnization_activity__workplan_area=wpa).filter(active_quarter__quarter__lte=previous_report_quarter)
             for wpa_output in wpa_outputs:
                 if wpa_output.is_goal is not None:
                     tmp_outputs_pf_summary["perform"][goal_choices[wpa_output.is_goal]] += 1
@@ -691,7 +696,7 @@ def output_customreport_2(request):
         "workplan_directions":workplan_directions_json,
         "barpiechart_data":outputs_summary_json,
         "highlight_text":highlight_text_json,
-        "report_year":datetime.datetime.now().year,
+        "report_year":CURRENT_YEAR,
     }
 
 # Export report as PDF
@@ -704,19 +709,19 @@ def output_customreport_pdf_2015(request):
         previous_report_quarter =  1
     else:
         closed_reporting_quarters += "".join((", %d" % q for q in range(2,previous_report_quarter+1)))
-    outputs = Output.objects.filter(orgnization_activity__year=datetime.datetime.now().year)
+    outputs = Output.objects.filter(orgnization_activity__year=CURRENT_YEAR)
     outputs_summary = []
     workplan_directions = WorkplanDirection.objects.all()
     wpds = []
     goal_choices = {1:"Yes",0:"No",-1:"NotReported",-99:"TBD"}
     for wpd in workplan_directions:
         wpds.append({"str_id":wpd.str_id,"description":wpd.description})
-        workplan_areas = WorkplanArea.objects.filter(workplan_direction=wpd,year=datetime.datetime.now().year)
+        workplan_areas = WorkplanArea.objects.filter(workplan_direction=wpd,year=CURRENT_YEAR)
         tmp_wpd_pf_summary = {"total":0,"Yes":0,"No":0,"NotReported":0,"TBD":0}
         wpa_list = []
         for wpa in workplan_areas:
             wpa_list.append({wpa.str_id:wpa.description})
-            wpa_outputs = Output.objects.filter(orgnization_activity__year=datetime.datetime.now().year).filter(orgnization_activity__workplan_area=wpa).filter(active_quarter__quarter__lte=previous_report_quarter)
+            wpa_outputs = Output.objects.filter(orgnization_activity__year=CURRENT_YEAR).filter(orgnization_activity__workplan_area=wpa).filter(active_quarter__quarter__lte=previous_report_quarter)
             for wpa_output in wpa_outputs:
                 tmp_wpd_pf_summary["total"] += 1
                 if wpa_output.is_goal is not None:
@@ -1635,7 +1640,7 @@ def output_customreport_pdf_2016(request):
         previous_report_quarter =  1
     else:
         closed_reporting_quarters += "".join((", %d" % q for q in range(2,previous_report_quarter+1)))
-    outputs = Output.objects.filter(orgnization_activity__year=datetime.datetime.now().year)
+    outputs = Output.objects.filter(orgnization_activity__year=CURRENT_YEAR)
     outputs_summary = []
     workplan_directions = WorkplanDirection.objects.all()
     wpds = []
@@ -1643,13 +1648,13 @@ def output_customreport_pdf_2016(request):
     goal_choices = {1:"Yes",0:"No",-1:"NotReported",-99:"TBD"}
     for wpd in workplan_directions:
         wpds.append({"str_id":wpd.str_id,"description":wpd.description})
-        workplan_areas = WorkplanArea.objects.filter(workplan_direction=wpd,year=datetime.datetime.now().year)
+        workplan_areas = WorkplanArea.objects.filter(workplan_direction=wpd,year=CURRENT_YEAR)
         tmp_wpd_pf_summary = {"total":0,"Yes":0,"No":0,"NotReported":0,"TBD":0}
         wpa_list = []
         for wpa in workplan_areas:
             wpa_list.append({wpa.str_id:wpa.description})
             wpa_text[wpa.str_id] = wpa.description
-            wpa_outputs = Output.objects.filter(orgnization_activity__year=datetime.datetime.now().year).filter(orgnization_activity__workplan_area=wpa).filter(active_quarter__quarter__lte=previous_report_quarter)
+            wpa_outputs = Output.objects.filter(orgnization_activity__year=CURRENT_YEAR).filter(orgnization_activity__workplan_area=wpa).filter(active_quarter__quarter__lte=previous_report_quarter)
             for wpa_output in wpa_outputs:
                 tmp_wpd_pf_summary["total"] += 1
                 if wpa_output.is_goal is not None:
@@ -2624,7 +2629,7 @@ def output_exportbuilder(request):
                         error_msg = "There is no outputs in 2016 Quarter %s." % q
         elif "file" in request.GET and request.GET["file"] != "":
             download_file = request.GET["file"]
-    years = range(2015,datetime.datetime.now().year+1)
+    years = range(2015,CURRENT_YEAR+1)
     years.reverse()
     return {
             "error_msg":error_msg,
