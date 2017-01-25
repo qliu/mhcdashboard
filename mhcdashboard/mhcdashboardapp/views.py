@@ -318,7 +318,7 @@ def report_output_temp(request,qid):
     save_msg = ""
     login_user = MyUser.objects.get(user=request.user)
     org_id = login_user.organization.id
-    report_q = qid
+    report_q = int(qid)
     select_options = None
     organization = Organization.objects.get(id=org_id)
     workplan_areas = []
@@ -338,7 +338,7 @@ def report_output_temp(request,qid):
             org_activities.append(op.orgnization_activity)
             org_activitie_ids.append(op.orgnization_activity.id)       
     if report_q > 1:
-        if q ==4 and CURRENT_YEAR == 2017:
+        if report_q == 4 and CURRENT_YEAR == 2017:
             temp_year = 2016
         else:
             temp_year = CURRENT_YEAR
@@ -418,7 +418,7 @@ def report_output_temp(request,qid):
 
     return {
         "report_quarter":report_q,
-        "report_year":CURRENT_YEAR,
+        "report_year":temp_year,
         "organization":organization,
         "select_options":select_options,
         "workplan_areas":workplan_areas,
