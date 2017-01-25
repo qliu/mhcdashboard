@@ -43,7 +43,7 @@ MY_NULL_VALUES = ('na','n/a','none','nan','null')
 #=================
 # Util Functions
 #=================
-TIMEWINDOW_DAYS = 15
+TIMEWINDOW_DAYS = 30
 CURRENT_YEAR = (datetime.date.today()-datetime.timedelta(days=TIMEWINDOW_DAYS)).year
 QUARTER_START_END = (
     (datetime.date(CURRENT_YEAR,1,1)+datetime.timedelta(days=TIMEWINDOW_DAYS),

@@ -318,7 +318,7 @@ def report_output_temp(request,qid):
     save_msg = ""
     login_user = MyUser.objects.get(user=request.user)
     org_id = login_user.organization.id
-    report_q = int(qid)
+    report_q = qid
     select_options = None
     organization = Organization.objects.get(id=org_id)
     workplan_areas = []
@@ -338,15 +338,11 @@ def report_output_temp(request,qid):
             org_activities.append(op.orgnization_activity)
             org_activitie_ids.append(op.orgnization_activity.id)       
     if report_q > 1:
-        if report_q == 4 and CURRENT_YEAR == 2017:
-            temp_year = 2016
-        else:
-            temp_year = CURRENT_YEAR
-        outputs_previous = Output.objects.filter(orgnization_activity__year=temp_year).filter(active_quarter__quarter__lt=report_q).filter(orgnization_activity__organization__id=org_id)
+        outputs_previous = Output.objects.filter(orgnization_activity__year=CURRENT_YEAR).filter(active_quarter__quarter__lt=report_q).filter(orgnization_activity__organization__id=org_id)
     else:
         outputs_previous = None
 
-    outputs_report = Output.objects.filter(orgnization_activity__year=temp_year).filter(active_quarter__quarter=report_q).filter(orgnization_activity__organization__id=org_id).order_by('id')
+    outputs_report = Output.objects.filter(orgnization_activity__year=CURRENT_YEAR).filter(active_quarter__quarter=report_q).filter(orgnization_activity__organization__id=org_id).order_by('id')
     if request.method == 'POST':
         # pre-select Workplan Area, MHC Activity, Org Activity as filters
         if request.POST["OrgActID"]:
@@ -413,12 +409,12 @@ def report_output_temp(request,qid):
                 error_info = exc_obj
                 error_msg = "%s: %s. Please try again!" % (error_type,error_info)
         if error_msg == "":
-            outputs_current = Output.objects.filter(orgnization_activity__year=temp_year).filter(active_quarter__quarter=report_q).filter(orgnization_activity__organization__id=org_id).order_by('id')
+            outputs_current = Output.objects.filter(orgnization_activity__year=CURRENT_YEAR).filter(active_quarter__quarter=report_q).filter(orgnization_activity__organization__id=org_id).order_by('id')
             save_msg = "Changes to Output have been saved!"
 
     return {
         "report_quarter":report_q,
-        "report_year":temp_year,
+        "report_year":CURRENT_YEAR,
         "organization":organization,
         "select_options":select_options,
         "workplan_areas":workplan_areas,
