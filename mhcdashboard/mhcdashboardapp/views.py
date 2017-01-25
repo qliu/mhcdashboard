@@ -246,7 +246,7 @@ def report_output(request):
             op_output_value = request.POST.get("id_output_set-%d-output_value" % op_id)
 
             op.output_value = op_output_value
-            if (not op_output_value) or (op_output_value == "None"):
+            if (not op_output_value.strip()) or (op_output_value.strip().lower() in MY_NULL_VALUES):
                 if op_comment and op_comment != "None":
                     op.is_goal = -99
                 else:

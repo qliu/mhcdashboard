@@ -9,8 +9,8 @@ LIST_PER_PAGE = 10
 
 class MyUserAdmin(admin.ModelAdmin):
     fields = ['user','organization','has_temp_access','temp_access_expire']
-    list_display = ('user','_get_user_first_name','_get_user_first_name','organization','_get_user_email','has_temp_access','temp_access_expire')
-    search_fields = ['user','_get_user_first_name','_get_user_first_name','organization','_get_user_email']
+    list_display = ('user','_get_user_first_name','_get_user_last_name','organization','_get_user_email','has_temp_access','temp_access_expire')
+    search_fields = ['user__first_name','user__last_name','user__username','organization__name','organization__abbreviation']
 admin.site.register(MyUser,MyUserAdmin)
 
 class DescriptorInline(admin.StackedInline):

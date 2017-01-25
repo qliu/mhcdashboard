@@ -30,6 +30,7 @@ def is_number(s):
 #=================
 BOOL_CHOICES = ((1,'Yes'),(0,'No'))
 GOAL_CHOICES = ((1,'Yes'),(0,'No'),(-1,'Not Reported'),(-99,'TBD'))
+MY_NULL_VALUES = ('na','n/a','none','nan','null')
 #DEADLINE_CHOICES = (
 #    (0,'Ongoing'),
 #    (1,'Q1'),
@@ -451,7 +452,7 @@ class Output(models.Model):
 
     def save(self, *args, **kwargs):       
         # determin if the goal is reached by the output value
-        if (not self.output_value) or (self.output_value == "None"):
+        if (not self.output_value.strip()) or (self.output_value.strip().lower() in MY_NULL_VALUES):
             if self.comment and self.comment != "None":
                 self.is_goal = -99
             else:
