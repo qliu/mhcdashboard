@@ -517,20 +517,23 @@ def output_reportpage_2(request):
 @login_required
 @render_to("mhcdashboardapp/output_reportpage_builder.html")
 def output_reportpage_builder(request):
+    report_year = CURRENT_YEAR
     previous_report_quarter = report_quarter() - 1
     closed_reporting_quarters = "Q1"
     if previous_report_quarter < 1:
-        previous_report_quarter =  1
+        previous_report_quarter =  4
+        report_year -= 1
+        closed_reporting_quarters = "Q4"
     else:
         closed_reporting_quarters += "".join((", Q%d" % q for q in range(2,previous_report_quarter+1)))
-    outputs = Output.objects.filter(orgnization_activity__year=CURRENT_YEAR)
+    outputs = Output.objects.filter(orgnization_activity__year=report_year)
     outputs_summary = []
     workplan_directions = WorkplanDirection.objects.all()
     wpds = []
     goal_choices = {1:"Yes",0:"No",-1:"NotReported",-99:"TBD"}
     for wpd in workplan_directions:
         wpds.append({"str_id":wpd.str_id,"description":wpd.description})
-        workplan_areas = WorkplanArea.objects.filter(workplan_direction=wpd,year=CURRENT_YEAR)
+        workplan_areas = WorkplanArea.objects.filter(workplan_direction=wpd,year=report_year)
         outputs_pf_summary = []
         for wpa in workplan_areas:
             tmp_outputs_pf_summary = collections.OrderedDict([
@@ -538,7 +541,7 @@ def output_reportpage_builder(request):
             ("WPA_name",wpa.description),
             ("perform",collections.OrderedDict([("Yes",0),("No",0),("NotReported",0),("TBD",0)]))
             ])
-            wpa_outputs = Output.objects.filter(orgnization_activity__year=CURRENT_YEAR).filter(orgnization_activity__workplan_area=wpa).filter(active_quarter__quarter__lte=previous_report_quarter)
+            wpa_outputs = Output.objects.filter(orgnization_activity__year=report_year).filter(orgnization_activity__workplan_area=wpa).filter(active_quarter__quarter__lte=previous_report_quarter)
             for wpa_output in wpa_outputs:
                 if wpa_output.is_goal is not None:
                     tmp_outputs_pf_summary["perform"][goal_choices[wpa_output.is_goal]] += 1
@@ -550,7 +553,7 @@ def output_reportpage_builder(request):
         "closed_reporting_quarters":closed_reporting_quarters,
         "workplan_directions":workplan_directions_json,
         "barpiechart_data":outputs_summary_json,
-        "report_year":CURRENT_YEAR,        
+        "report_year":report_year,        
     }
 
 # Report Builder with Template 2
