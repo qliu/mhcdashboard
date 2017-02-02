@@ -165,6 +165,7 @@ def home(request):
             "barpiechart_data_2_q3":org_pf_summary_q3_json,
             "barpiechart_data_2_q4":org_pf_summary_q4_json,
             "outputs_goal_no":outputs_goal_no,
+            "current_year":CURRENT_YEAR
     }
 
 
