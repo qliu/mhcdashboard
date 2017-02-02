@@ -1701,7 +1701,7 @@ def output_customreport_pdf_2016(request):
     p.setFillColor(HexColor("#08426A"))
     p.drawText(txtobj)
     #### Report Sub-title
-    p_title = "Outputs in 2016 %s" % closed_reporting_quarters
+    p_title = "Outputs in 2016 Q1 - %s" % closed_reporting_quarters
     txtobj = p.beginText()
     txtobj.setTextOrigin(140,100)
     txtobj.setFont("Helvetica-BoldOblique",18)
